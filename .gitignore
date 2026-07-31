@@ -1,0 +1,6 @@
+usb-backup.conf
+*.log
+.DS_Store
+*.swp
+*~
+/test-mount/
