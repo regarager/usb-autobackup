@@ -1,17 +1,31 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# External drive identifier
-# replace TARGET_UUID with your drive's UUID (lsblk -f)
-TARGET_UUID = ""
-MOUNT_POINT = "/mnt/usb_backup"
-BACKUP_DIR = "backups"
+USER_HOME=$(getent passwd "${SUDO_USER:-$USER}" | cut -d: -f6)
+CONFIG_FILE="$USER_HOME/.config/usb-backup/usb-backup.conf"
 
-# Paths to files you want to back up 
-FILEPATHS = (
-	"$HOME/Documents"
+# Load config file 
+if [ -f "$CONFIG_FILE" ]; then 
+	source "$CONFIG_FILE"
+else
+	echo "ERROR: Config file not found at ${CONFIG_FILE}." >&2
+	exit 1
+fi 
 
-	)
+# Validating required variables
+if [ -z "${TARGET_UUID}" ]; then
+	echo "ERROR: TARGET_UUID is not set in ${CONFIG_FILE}." >&2
+	exit 1
+elif [ -z "${MOUNT_POINT}" ]; then
+	echo "ERROR: MOUNT_POINT is not set in ${CONFIG_FILE}." >&2
+	exit 1
+elif [ -z "${BACKUP_DIR}" ]; then
+	echo "ERROR: BACKUP_DIR is not set in ${CONFIG_FILE}."  >&2
+	exit 1
+elif [ "${FILEPATHS[@]}" -eq 0 ]; then
+	echo "ERROR: no filepaths set in ${CONFIG_FILE}." >&2
+fi 
+
 
 mkdir -p "$MOUNT_POINT"
 if ! mountpoint -q "$MOUNT_POINT"; then
@@ -20,7 +34,7 @@ fi
 
 cleanup() {
 	if mountpoint -q "$MOUNT_POINT"; then
-		unmount "$MOUNT_POINT"
+		umount "$MOUNT_POINT"
 	fi 
 
 }
@@ -28,10 +42,10 @@ trap cleanup EXIT
 
 
 
-DESTINATION_DIR = "$MOUNT_POINT/$BACKUP_DIR"
+DESTINATION_DIR="$MOUNT_POINT/$BACKUP_DIR"
 mkdir -p "$DESTINATION_DIR"
 
-for ITEM in "$FILEPATHS"; do 
+for ITEM in "${FILEPATHS[@]}"; do 
 	if [ -e "$ITEM" ]; then
 		rsync -av --relative --delete "$ITEM" "$DESTINATION_DIR"
 	else
