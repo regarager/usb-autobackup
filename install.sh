@@ -56,6 +56,9 @@ if [ -f "$CONFIG_FILE" ]; then
     CURRENT_UUID=$(grep -E '^TARGET_UUID=' "$CONFIG_FILE" | cut -d'"' -f2 || true)
 fi
 
+echo "Available drives:"
+lsblk -o NAME,UUID
+
 # Default to the config's UUID if the user presses Enter
 if [ -n "$CURRENT_UUID" ] && [ "$CURRENT_UUID" != "YOUR_USB_UUID_HERE" ]; then
     echo "--> Found existing UUID in config: $CURRENT_UUID"

@@ -1,13 +1,12 @@
-
 # External drive identifier
 # replace TARGET_UUID with your drive's UUID (lsblk -f)
 TARGET_UUID=""
 MOUNT_POINT="/mnt/usb_backup"
 BACKUP_DIR="backups"
 
-# Paths to files you want to back up 
+# Paths to files you want to back up
+# NOTE: folders should be listed without a trailing slash, e.g. ~/Documents instead of ~/Documents/
 FILEPATHS=(
 	#"$HOME/Documents"
-
-	)
+)
 
