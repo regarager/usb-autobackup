@@ -50,15 +50,28 @@ else
     echo "--> Existing configuration found at $CONFIG_FILE (skipping overwrite)."
 fi
 
-# 3. Prompt for UUID option
-read -rp "Enter your USB Drive UUID (press Enter to set it manually in $CONFIG_FILE later): " INPUT_UUID
-
-if [ -n "$INPUT_UUID" ] && [ -f "$CONFIG_FILE" ]; then
-    sed -i "s/TARGET_UUID=\".*\"/TARGET_UUID=\"$INPUT_UUID\"/" "$CONFIG_FILE" || true
-    echo "--> Set TARGET_UUID in $CONFIG_FILE"
+# 3. Parse existing TARGET_UUID from config file
+CURRENT_UUID=""
+if [ -f "$CONFIG_FILE" ]; then
+    CURRENT_UUID=$(grep -E '^TARGET_UUID=' "$CONFIG_FILE" | cut -d'"' -f2 || true)
 fi
 
-RULE_UUID="${INPUT_UUID:-YOUR_USB_UUID_HERE}"
+# Default to the config's UUID if the user presses Enter
+if [ -n "$CURRENT_UUID" ] && [ "$CURRENT_UUID" != "YOUR_USB_UUID_HERE" ]; then
+    echo "--> Found existing UUID in config: $CURRENT_UUID"
+    read -rp "Enter USB Drive UUID [Press Enter to keep $CURRENT_UUID]: " INPUT_UUID
+    TARGET_UUID="${INPUT_UUID:-$CURRENT_UUID}"
+else
+    read -rp "Enter your USB Drive UUID: " INPUT_UUID
+    TARGET_UUID="$INPUT_UUID"
+fi
+
+# Save the UUID to config
+if [ -n "$TARGET_UUID" ] && [ -f "$CONFIG_FILE" ]; then
+    sed -i "s/TARGET_UUID=\".*\"/TARGET_UUID=\"$TARGET_UUID\"/" "$CONFIG_FILE"
+fi
+
+RULE_UUID="${TARGET_UUID:-YOUR_USB_UUID_HERE}"
 
 # 4. Install systemd service unit
 SYSTEMD_SERVICE="/etc/systemd/system/usb-backup.service"
