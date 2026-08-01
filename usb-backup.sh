@@ -2,6 +2,7 @@
 set -euo pipefail
 
 USER_HOME=$(getent passwd "${SUDO_USER:-$USER}" | cut -d: -f6)
+HOME="$USER_HOME"
 CONFIG_FILE="$USER_HOME/.config/usb-backup/usb-backup.conf"
 
 # Load config file 
@@ -45,7 +46,7 @@ trap cleanup EXIT
 DESTINATION_DIR="$MOUNT_POINT/$BACKUP_DIR"
 mkdir -p "$DESTINATION_DIR"
 
-for ITEM in "${FILEPATHS[@]}"; do 
+for ITEM in "${#FILEPATHS[@]}"; do 
 	if [ -e "$ITEM" ]; then
 		rsync -av --delete "$ITEM" "$DESTINATION_DIR"
 	else
