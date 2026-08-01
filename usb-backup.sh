@@ -48,7 +48,7 @@ mkdir -p "$DESTINATION_DIR"
 
 for ITEM in "${#FILEPATHS[@]}"; do 
 	if [ -e "$ITEM" ]; then
-		rsync -av --delete "$ITEM" "$DESTINATION_DIR"
+		rsync -rtv --no-perms --no-owner --no-group --delete "$ITEM" "$DESTINATION_DIR"
 	else
 		echo "WARNING: $ITEM does not exist, skipping."
 	fi 
