@@ -23,7 +23,7 @@ elif [ -z "${MOUNT_POINT}" ]; then
 elif [ -z "${BACKUP_DIR}" ]; then
 	echo "ERROR: BACKUP_DIR is not set in ${CONFIG_FILE}."  >&2
 	exit 1
-elif [ "${FILEPATHS[@]}" -eq 0 ]; then
+elif [ "${#FILEPATHS[@]}" -eq 0 ]; then
 	echo "ERROR: no filepaths set in ${CONFIG_FILE}." >&2
 fi 
 
@@ -46,7 +46,7 @@ trap cleanup EXIT
 DESTINATION_DIR="$MOUNT_POINT/$BACKUP_DIR"
 mkdir -p "$DESTINATION_DIR"
 
-for ITEM in "${#FILEPATHS[@]}"; do 
+for ITEM in "${FILEPATHS[@]}"; do 
 	if [ -e "$ITEM" ]; then
 		rsync -rtv --no-perms --no-owner --no-group --delete "$ITEM" "$DESTINATION_DIR"
 	else
